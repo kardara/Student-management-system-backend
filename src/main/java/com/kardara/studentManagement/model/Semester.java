@@ -1,7 +1,6 @@
 package com.kardara.studentManagement.model;
 
 import java.time.LocalDate;
-import java.time.Year;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +34,7 @@ public class Semester {
     private UUID id;
 
     @Column(name = "year")
-    private Year year;
+    private int year;
 
     @Column(name = "name")
     private ESemesterName name;

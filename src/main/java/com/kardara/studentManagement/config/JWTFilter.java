@@ -19,7 +19,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Component
 public class JWTFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -32,6 +31,12 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
 
+        // Skip JWT validation for auth and globalSearch endpoints, except /auth/me
+        if ((req.getRequestURI().startsWith("/auth/") && !req.getRequestURI().equals("/auth/me")) || req.getRequestURI().startsWith("/globalSearch")) {
+            filterChain.doFilter(req, res);
+            return;
+        }
+
         String authenticationHeader = req.getHeader("Authorization");
         String token = null;
         String username = null;
@@ -42,6 +47,20 @@ public class JWTFilter extends OncePerRequestFilter {
                     && authenticationHeader.length() > 8) {
                 token = authenticationHeader.substring(7);
                 username = jwtUtilities.extractUsername(token);
+            }
+
+            // Check for token in cookies if not found in header
+            if (token == null) {
+                jakarta.servlet.http.Cookie[] cookies = req.getCookies();
+                if (cookies != null) {
+                    for (jakarta.servlet.http.Cookie cookie : cookies) {
+                        if ("token".equals(cookie.getName())) {
+                            token = cookie.getValue();
+                            username = jwtUtilities.extractUsername(token);
+                            break;
+                        }
+                    }
+                }
             }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

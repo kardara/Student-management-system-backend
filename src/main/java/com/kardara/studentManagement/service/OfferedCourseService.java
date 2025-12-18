@@ -53,6 +53,11 @@ public class OfferedCourseService {
                         offeredCourse.setSemester(semester.get());
                         offeredCourse.setTeacher(teacher.get());
 
+                        // Set default capacity if not provided
+                        if (offeredCourse.getSize() <= 0) {
+                            offeredCourse.setSize(30); // Default capacity of 30 students
+                        }
+
                         offeredCourseRepository.save(offeredCourse);
 
                         return new OperationResult(true, "Offered course save successfully");
@@ -109,7 +114,13 @@ public class OfferedCourseService {
                             newCourse.setDay(offeredCourse.getDay());
                             newCourse.setTime(offeredCourse.getTime());
                             newCourse.setRoom(offeredCourse.getRoom());
-                            newCourse.setSize(offeredCourse.getSize());
+
+                            // Set default capacity if not provided or invalid
+                            if (offeredCourse.getSize() <= 0) {
+                                newCourse.setSize(30); // Default capacity of 30 students
+                            } else {
+                                newCourse.setSize(offeredCourse.getSize());
+                            }
 
                             offeredCourseRepository.save(newCourse);
 

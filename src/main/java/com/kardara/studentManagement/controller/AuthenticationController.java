@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,12 +93,23 @@ public class AuthenticationController {
                     ? oauth2User.getAttribute("email")
                     : oauth2User.getAttribute("login");
 
+            if (username == null) {
+                response.sendRedirect(frontEndIp + "/auth/oauth2/failed");
+                return;
+            }
+
+            // Check if user exists
+            LoginResponse userData = authenticationService.getUserData(username);
+            if (!userData.isSuccess()) {
+                response.sendRedirect(frontEndIp + "/auth/oauth2/failed");
+                return;
+            }
+
             String token = jwtUtilities.generateToken(username);
 
             // Set the token in the Authorization header
             response.addCookie(new Cookie("token", token) {
                 {
-                    setHttpOnly(true); // Prevent access from JavaScript
                     setSecure(true); // Only send over HTTPS
                     setPath("/"); // Cookie available to the entire domain
                 }
@@ -106,6 +118,20 @@ public class AuthenticationController {
         } catch (Exception e) {
             System.out.println("An error occurred: " + e.getMessage());
             response.sendRedirect(frontEndIp + "/auth/oauth2/failed");
+        }
+    }
+
+    @GetMapping("me")
+    public ResponseEntity<?> getMe(Authentication auth) {
+        if (auth == null) {
+            return ResponseEntity.status(401).build();
+        }
+        String email = auth.getName();
+        LoginResponse res = authenticationService.getUserData(email);
+        if (res.isSuccess()) {
+            return ResponseEntity.ok(res);
+        } else {
+            return ResponseEntity.status(404).body(res);
         }
     }
 

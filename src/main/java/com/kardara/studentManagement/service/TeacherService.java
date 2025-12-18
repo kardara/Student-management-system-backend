@@ -29,7 +29,9 @@ public class TeacherService {
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(8);
 
     public OperationResult add(Teacher teacher) {
-
+        if (teacher.getPassword() != null && !teacher.getPassword().isEmpty()) {
+            teacher.setPassword(encoder.encode(teacher.getPassword()));
+        }
         teacherRepository.save(teacher);
         return new OperationResult(true,
                 "Teacher " + teacher.getFirstName() + " " + teacher.getLastName() + " added successfully");
@@ -82,10 +84,14 @@ public class TeacherService {
 
         if (t.isPresent()) {
             Teacher teacher = t.get();
-            List<OfferedCourse> courses = offeredCourseRepository.findByTeacherAndSemester(teacher, semesterService.getCurrentSemester());
+            List<OfferedCourse> courses = offeredCourseRepository.findByTeacherAndSemesterWithRegistrations(teacher, semesterService.getCurrentSemester());
 
             for (OfferedCourse course : courses) {
                 course.setTeacher(null);
+                // Ensure registrations are loaded
+                if (course.getRegistrations() != null) {
+                    course.getRegistrations().size(); // Initialize lazy collection
+                }
             }
 
             return courses;

@@ -54,20 +54,10 @@ public class AuthenticationService {
             if (t.isPresent()) {
                 Teacher teacher = t.get();
                 if (encoder.matches(req.getPassword(), teacher.getPassword())) {
-                    // String token = jwtUtilities.generateToken(teacher.getEmail());
-
-                    // email test
-                    // emailService.adminLoginMailAlert(new UserData(teacher));
-                    ///
-                    UUID token = UUID.randomUUID();
-                    otpService.generateAndSendOtp(token, String.valueOf(teacher.getEmail()), "TEACHER",
-                            new UserData(teacher));
-
-                    LoginResponse resp = new LoginResponse(true, token.toString(), teacher.getRole().toString(),
-                            "Use the OTP sent to your email, to login" + teacher.getRole().toString(),
-                            semesterService.getCurrentSemester());
-                    // resp.setUserInfo(teacher);
-                    return resp;
+                    String token = jwtUtilities.generateToken(teacher.getEmail());
+                    return new LoginResponse(true, token, teacher.getRole().toString(),
+                            "Successfully logged in as " + teacher.getRole().toString(),
+                            semesterService.getCurrentSemester(), new UserData(teacher));
                 } else {
                     return new LoginResponse(false, "Incorect credentials");
                 }
@@ -81,19 +71,10 @@ public class AuthenticationService {
             if (st.isPresent()) {
                 Staff staff = st.get();
                 if (encoder.matches(req.getPassword(), staff.getPassword())) {
-                    // String token = jwtUtilities.generateToken(staff.getEmail());
-
-                    // email test
-                    // emailService.adminLoginMailAlert(new UserData(staff));
-                    ///
-                    ///
-                    UUID token = UUID.randomUUID();
-                    otpService.generateAndSendOtp(token, String.valueOf(staff.getEmail()), "STAFF",
-                            new UserData(staff));
-
-                    return new LoginResponse(true, token.toString(), staff.getRole().toString(),
-                            "Use the OTP sent to your email, to login",
-                            semesterService.getCurrentSemester());
+                    String token = jwtUtilities.generateToken(staff.getEmail());
+                    return new LoginResponse(true, token, staff.getRole().toString(),
+                            "Successfully logged in as " + staff.getRole().toString(),
+                            semesterService.getCurrentSemester(), new UserData(staff));
                 } else {
                     return new LoginResponse(false, "Incorect credentials");
                 }
@@ -107,14 +88,10 @@ public class AuthenticationService {
                 if (st.isPresent()) {
                     Student student = st.get();
                     if (encoder.matches(req.getPassword(), student.getPassword())) {
-                        // String token = jwtUtilities.generateToken(student.getEmail());
-                        // emailService.adminLoginMailAlert(new UserData(student));
-                        UUID token = UUID.randomUUID();
-                        otpService.generateAndSendOtp(token, String.valueOf(student.getId()), "STUDENT",
-                                new UserData(student));
-                        return new LoginResponse(true, token.toString(), "STUDENT",
-                                "Use the OTP sent to your email, to login",
-                                semesterService.getCurrentSemester());
+                        String token = jwtUtilities.generateToken(student.getEmail());
+                        return new LoginResponse(true, token, "STUDENT",
+                                "Successfully logged in as STUDENT",
+                                semesterService.getCurrentSemester(), new UserData(student));
                     } else {
                         return new LoginResponse(false, "Incorect credentials");
                     }
@@ -125,21 +102,10 @@ public class AuthenticationService {
                 if (st.isPresent()) {
                     Student student = st.get();
                     if (encoder.matches(req.getPassword(), student.getPassword())) {
-                        // String token = jwtUtilities.generateToken(student.getEmail());
-
-                        // email test
-                        // emailService.adminLoginMailAlert(new UserData(student));
-                        ///
-
-                        UUID token = UUID.randomUUID();
-                        otpService.generateAndSendOtp(token, String.valueOf(student.getId()), "STUDENT",
-                                new UserData(student));
-
-                        LoginResponse resp = new LoginResponse(true, token.toString(), "STUDENT",
-                                "Use the OTP sent to your email, to login", semesterService.getCurrentSemester());
-                        // resp.setUserInfo(student);
-
-                        return resp;
+                        String token = jwtUtilities.generateToken(student.getEmail());
+                        return new LoginResponse(true, token, "STUDENT",
+                                "Successfully logged in as STUDENT",
+                                semesterService.getCurrentSemester(), new UserData(student));
                     } else {
                         return new LoginResponse(false, "Incorect credentials");
                     }
@@ -256,6 +222,34 @@ public class AuthenticationService {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public LoginResponse getUserData(String email) {
+        Optional<Teacher> t = teacherRepository.findByEmail(email);
+        if (t.isPresent()) {
+            Teacher teacher = t.get();
+            return new LoginResponse(true, null, teacher.getRole().toString(),
+                    "User data",
+                    semesterService.getCurrentSemester(), new UserData(teacher));
+        }
+
+        Optional<Staff> st = staffRepository.findByEmail(email);
+        if (st.isPresent()) {
+            Staff staff = st.get();
+            return new LoginResponse(true, null, staff.getRole().toString(),
+                    "User data",
+                    semesterService.getCurrentSemester(), new UserData(staff));
+        }
+
+        Optional<Student> s = studentRepository.findByEmail(email);
+        if (s.isPresent()) {
+            Student student = s.get();
+            return new LoginResponse(true, null, "STUDENT",
+                    "User data",
+                    semesterService.getCurrentSemester(), new UserData(student));
+        }
+
+        return new LoginResponse(false, "User not found");
     }
 
 }

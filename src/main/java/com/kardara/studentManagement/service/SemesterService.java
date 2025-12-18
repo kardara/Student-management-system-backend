@@ -1,5 +1,6 @@
 package com.kardara.studentManagement.service;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public class SemesterService {
     private SemesterRepository semesterRepository;
 
     public OperationResult add(Semester semester) {
-        boolean exist = semesterRepository.existsByYearAndName(semester.getYear(), semester.getName());
+        boolean exist = semesterRepository.existsByYearAndName(Year.of(semester.getYear()), semester.getName());
         if (exist) {
             return new OperationResult(false, "Cannot save semester with same name in the same year");
         } else {

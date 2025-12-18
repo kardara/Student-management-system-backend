@@ -33,8 +33,7 @@ public class JWTUtilities {
     // }
 
     private SecretKey getKey() {
-        byte[] keyBites = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBites);
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public String generateToken(String username) {

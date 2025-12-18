@@ -32,9 +32,6 @@ public class SecurityConfig {
     @Autowired
     private UsersDetailsOauth2Services usersDetailsOauth2Services;
 
-    @Autowired
-    private JWTFilter jwtFilter;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -58,7 +55,6 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(usersDetailsOauth2Services))
                         .defaultSuccessUrl(frontEndIp + "/auth/oauth2/success", true))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

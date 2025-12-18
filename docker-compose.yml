@@ -9,7 +9,7 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/studentdb
       - DB_USER=postgres
       - DB_PASS=kardara
-      - FRONT_END=http://localhost:3000
+      - FRONT_END=http://localhost:5173
       - EMAIL_USERNAME=${EMAIL_USERNAME}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - OAUTH_GOOGLE_ID=${OAUTH_GOOGLE_ID}

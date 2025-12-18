@@ -43,7 +43,10 @@ public class OtpService {
     LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES);
     otpStorage.put(otpID, new OtpData(otp, expiryTime, userType, userId, userData));
 
-    return sendOtpEmail(adminEmail, otp, userData);
+    System.out.println("Sending OTP to: " + userData.getEmail());
+    boolean result = sendOtpEmail(userData.getEmail(), otp, userData);
+    System.out.println("OTP send result: " + result);
+    return result;
   }
 
   public boolean generateAndSendPasswordResetOtp(UUID otpID, String userId, String userType, UserData userData) {
@@ -54,7 +57,7 @@ public class OtpService {
     LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES_PASWORD);
     otpStorage.put(otpID, new OtpData(otp, expiryTime, userType, userId, userData));
 
-    return sendPasswordResetOtp(adminEmail, otp, otpID.toString(), userData);
+    return sendPasswordResetOtp(userData.getEmail(), otp, otpID.toString(), userData);
   }
 
   public OtpValidationResponse<UserData> validateOtp(UUID otpID, String userProvidedOtp) {
@@ -169,6 +172,7 @@ public class OtpService {
       return true;
     } catch (Exception e) {
       // Log the exception
+      e.printStackTrace();
       return false;
     }
   }
